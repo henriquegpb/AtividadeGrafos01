@@ -1,4 +1,4 @@
-# Galeria CC — Peixe (SVG + D3)
+# Galeria CC: Peixe (SVG + D3)
 
 ## Contexto
 
@@ -24,7 +24,3 @@ Este projeto responde à **Parte II — Desenho com código** da aula: composiç
 ## Como visualizar
 
 Abra `peixinho.html` no navegador (duplo clique ou “Open with Live Server”, se usar). Não é necessário servidor para o D3 carregar do CDN.
-
-## Observação sobre entrega
-
-O envio oficial costuma ser pelo **formulário indicado no Slack** da turma; este repositório/arquivo serve como artefato nomeado e documentado para essa entrega.
