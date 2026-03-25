@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peixe D3.js</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0a1628;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    svg {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(180deg, #0a2a4a 0%, #0a1628 100%);
+    }
+  </style>
+</head>
+<body>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const svg = d3.select("body")
+      .append("svg")
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("viewBox", `0 0 ${width} ${height}`);
+
+    const bubbles = d3.range(15).map(() => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: 2 + Math.random() * 5,
+      speed: 0.3 + Math.random() * 0.7
+    }));
+
+    svg.selectAll(".bubble")
+      .data(bubbles)
+      .enter()
+      .append("circle")
+      .attr("class", "bubble")
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y)
+      .attr("r", d => d.r)
+      .attr("fill", "rgba(150, 220, 255, 0.25)");
+
+    const fish = svg.append("g")
+      .attr("class", "fish-group")
+      .style("cursor", "pointer")
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+    let fishHovered = false;
+    fish.on("mouseenter", () => { fishHovered = true; });
+    fish.on("mouseleave", () => { fishHovered = false; });
+
+    fish.append("ellipse")
+      .attr("class", "fish-body")
+      .attr("cx", 0)
+      .attr("cy", 0)
+      .attr("rx", 60)
+      .attr("ry", 30)
+      .attr("fill", "#f4a940");
+
+    fish.append("polygon")
+      .attr("class", "fish-tail")
+      .attr("points", "-55,-25 -85,0 -55,25")
+      .attr("fill", "#e8802a");
+
+    fish.append("circle")
+      .attr("cx", 30)
+      .attr("cy", -5)
+      .attr("r", 7)
+      .attr("fill", "white");
+
+    fish.append("circle")
+      .attr("cx", 32)
+      .attr("cy", -5)
+      .attr("r", 4)
+      .attr("fill", "#222");
+
+    fish.append("path")
+      .attr("class", "fish-mouth")
+      .attr("d", "M50,5 Q55,10 48,10")
+      .attr("stroke", "#c06020")
+      .attr("stroke-width", 2)
+      .attr("fill", "none");
+
+    fish.append("path")
+      .attr("class", "fish-fin")
+      .attr("d", "M-10,-28 Q5,-55 20,-28")
+      .attr("fill", "#e8802a");
+
+    fish.append("path")
+      .attr("class", "fish-fin fin-bottom")
+      .attr("d", "M0,28 Q10,42 20,28")
+      .attr("fill", "#e8802a");
+
+    [-10, 5, 20].forEach(x => {
+      fish.append("line")
+        .attr("x1", x).attr("y1", -22)
+        .attr("x2", x).attr("y2", 22)
+        .attr("stroke", "rgba(255,255,255,0.15)")
+        .attr("stroke-width", 2);
+    });
+
+    fish.append("ellipse")
+      .attr("class", "fish-hit")
+      .attr("cx", 0)
+      .attr("cy", 0)
+      .attr("rx", 78)
+      .attr("ry", 48)
+      .attr("fill", "transparent")
+      .attr("pointer-events", "all");
+
+    const interpBody = d3.interpolate("#f4a940", "#4ecdc4");
+    const interpAccent = d3.interpolate("#e8802a", "#2a9d8f");
+    const interpMouth = d3.interpolate("#c06020", "#1f6f68");
+
+    let t = 0;
+    let fishScale = 1;
+    let fishHoverBlend = 0;
+    function animate() {
+      t += 0.025;
+
+      const cx = width / 2 + Math.sin(t) * 200;
+      const cy = height / 2 + Math.cos(t * 0.7) * 80;
+      const angle = Math.cos(t) * 8;
+
+      const targetScale = fishHovered ? 1.14 : 1;
+      fishScale += (targetScale - fishScale) * 0.18;
+
+      const targetBlend = fishHovered ? 1 : 0;
+      fishHoverBlend += (targetBlend - fishHoverBlend) * 0.18;
+
+      fish.select(".fish-body").attr("fill", interpBody(fishHoverBlend));
+      fish.select(".fish-tail").attr("fill", interpAccent(fishHoverBlend));
+      fish.selectAll(".fish-fin").attr("fill", interpAccent(fishHoverBlend));
+      fish.select(".fish-mouth").attr("stroke", interpMouth(fishHoverBlend));
+
+      fish.attr("transform", `translate(${cx}, ${cy}) rotate(${angle}) scale(${fishScale})`);
+
+      svg.selectAll(".bubble")
+        .attr("cy", (d) => {
+          d.y -= d.speed;
+          if (d.y < -10) d.y = height + 10;
+          return d.y;
+        })
+        .attr("cx", (d) => d.x + Math.sin(d.y * 0.05) * 3);
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
